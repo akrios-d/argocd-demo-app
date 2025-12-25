@@ -4,14 +4,14 @@ metadata:
   name: kibana
   namespace: logging
   annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
 spec:
   ingressClassName: nginx
   rules:
-    - host: kibana.localhost
-      http:
+    - http:
         paths:
-          - path: /
+          - path: /kibana
             pathType: Prefix
             backend:
               service:
