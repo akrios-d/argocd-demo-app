@@ -10,8 +10,8 @@ metadata:
   name: filebeat
 rules:
   - apiGroups: [""]
-    resources: ["pods", "namespaces"]
-    verbs: ["get", "watch", "list"]
+    resources: ["pods", "namespaces", "nodes", "endpoints", "events"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["apps"]
     resources: ["replicasets", "deployments"]
     verbs: ["get", "watch", "list"]
