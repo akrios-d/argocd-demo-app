@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastic-agent-config
+  namespace: logging
+data:
+  elastic-agent.yml: |
+    outputs:
+      default:
+        type: elasticsearch
+        hosts: ["http://elasticsearch:9200"]
+    inputs:
+      - type: logfile
+        enabled: true
+        streams:
+          - paths:
+              - /var/log/containers/*.log
+      - type: metrics
+        enabled: true
+        hosts: ["localhost:9090"]
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: elastic-agent
+  namespace: logging
+spec:
+  selector:
+    matchLabels:
+      app: elastic-agent
+  template:
+    metadata:
+      labels:
+        app: elastic-agent
+    spec:
+      containers:
+        - name: elastic-agent
+          image: docker.elastic.co/beats/elastic-agent:8.14.3
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/elastic-agent/elastic-agent.yml
+              subPath: elastic-agent.yml
+      volumes:
+        - name: config
+          configMap:
+            name: elastic-agent-config
