@@ -30,7 +30,7 @@ Optional: - Argo CD CLI (`argocd`)
 ## 1. Create a Local Kubernetes Cluster
 
 ``` bash
-kind create cluster --name argocd-demo
+kind create cluster --name argocd-demo --config kind-config.yaml
 kubectl cluster-info
 ```
 
@@ -41,6 +41,7 @@ kubectl cluster-info
 ``` bash
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 kubectl get pods -n argocd
 ```
 
@@ -60,96 +61,6 @@ Get admin password:
 kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
 ```
 
-------------------------------------------------------------------------
-
-## 4. Repository Structure
-
-    .
-    ├── application.yaml
-    └── k8s
-        ├── deployment.yaml
-        └── service.yaml
-
-------------------------------------------------------------------------
-
-## 5. Kubernetes Manifests
-
-### Deployment
-
-``` yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-        - name: nginx
-          image: nginx:1.25
-          ports:
-            - containerPort: 80
-```
-
-### Service
-
-``` yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx
-spec:
-  type: ClusterIP
-  selector:
-    app: nginx
-  ports:
-    - port: 80
-      targetPort: 80
-```
-
-------------------------------------------------------------------------
-
-## 6. Argo CD Application
-
-``` yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: nginx-demo
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/YOUR_USERNAME/argocd-demo-app.git
-    targetRevision: HEAD
-    path: k8s
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-```
-
-------------------------------------------------------------------------
-
-## 7. Access the Application
-
-``` bash
-kubectl port-forward svc/nginx 8081:80
-```
-
-Open: http://localhost:8081
-
-------------------------------------------------------------------------
 
 ## Cleanup
 
